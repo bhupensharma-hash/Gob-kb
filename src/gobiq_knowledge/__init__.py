@@ -9,7 +9,7 @@ Public API:
 
     graph = load()
     chat_blob = assemble_chat_context(graph, node_id="domains.supply_chain.transfer_issues")
-    html = assemble_report(graph, output_spec_id="output_specs.availability_section")
+    html = assemble_report(graph, report_section_id="report_sections.availability_section")
 """
 
 from pathlib import Path
@@ -17,7 +17,7 @@ from typing import Optional
 
 from .loader import KnowledgeGraph, KnowledgeNode
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 _DEFAULT_KNOWLEDGE_ROOT = Path(__file__).resolve().parent.parent.parent / "knowledge"
 

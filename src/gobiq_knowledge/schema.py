@@ -81,11 +81,11 @@ def validate_node_dict(node_id: str, data: Dict[str, Any]) -> List[str]:
                 f"(must be one of: {sorted(VALID_RELATION_TYPES)})"
             )
 
-    # Procedure traversal validation
-    if node_type == "procedure":
+    # Playbook traversal validation
+    if node_type == "playbook":
         traversal = data.get("traversal", [])
         if not traversal:
-            errors.append(f"{node_id}: procedure node must have non-empty 'traversal'")
+            errors.append(f"{node_id}: playbook node must have non-empty 'traversal'")
         for i, step in enumerate(traversal):
             step_type = step.get("step")
             if step_type not in VALID_TRAVERSAL_STEP_TYPES:

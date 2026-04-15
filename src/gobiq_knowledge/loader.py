@@ -5,7 +5,7 @@ Walks the knowledge/ directory, finds all _node.yaml files, parses them into
 KnowledgeNode objects, validates references, and exposes methods for retrieval.
 
 Originally lifted from GoBIQ's backend/app/ai/knowledge/loader.py and extended
-with new atom types (concept, detection, threshold, output_spec).
+with new atom types (metric, diagnostic, benchmark, playbook, report_section).
 """
 
 from __future__ import annotations
@@ -22,16 +22,18 @@ logger = logging.getLogger(__name__)
 
 # Atom types recognized by the loader. Must match knowledge/_schema.yaml.
 VALID_NODE_TYPES = {
+    # Existing GoBIQ types:
     "global",
     "category",
-    "template",
+    "chat_template",
     "domain",
     "topic",
-    "procedure",
-    "concept",
-    "detection",
-    "threshold",
-    "output_spec",
+    # Option B taxonomy:
+    "metric",
+    "diagnostic",
+    "benchmark",
+    "playbook",
+    "report_section",
 }
 
 
@@ -52,10 +54,10 @@ class KnowledgeNode:
     expose_to_planner: bool = False
 
     # Type-specific fields:
-    traversal: List[dict] = field(default_factory=list)   # procedure
-    sql: Optional[str] = None                              # detection
-    thresholds: List[dict] = field(default_factory=list)   # threshold
-    sections: List[dict] = field(default_factory=list)     # output_spec
+    traversal: List[dict] = field(default_factory=list)   # playbook
+    sql: Optional[str] = None                              # diagnostic
+    thresholds: List[dict] = field(default_factory=list)   # benchmark
+    sections: List[dict] = field(default_factory=list)     # report_section
 
     content_path: Optional[Path] = None
 

@@ -6,21 +6,21 @@ This repo is the single source of truth for GoBIQ's analytical knowledge. Both t
 
 | Want to add... | Do this |
 |---|---|
-| A new metric definition | Create `knowledge/concepts/{metric_id}/` with `_node.yaml` (type: `concept`) + `content.md` |
-| A new detection rule | Create `knowledge/detections/{rule_id}/` (type: `detection`) — SQL fragment + threshold |
-| A new threshold band | Create `knowledge/thresholds/{name}/` (type: `threshold`) |
+| A new metric definition | Create `knowledge/metrics/{metric_id}/` with `_node.yaml` (type: `metric`) + `content.md` |
+| A new diagnostic rule | Create `knowledge/diagnostics/{rule_id}/` (type: `diagnostic`) — SQL fragment + threshold |
+| A new benchmark / threshold band | Create `knowledge/benchmarks/{name}/` (type: `benchmark`) |
 | A new domain topic | Create `knowledge/domains/{domain}/{topic}/` (type: `topic`) |
-| A new decision tree / playbook | Create `knowledge/procedures/{procedure_id}/` (type: `procedure`) — references atoms by ID in `traversal:` |
+| A new decision tree / playbook | Create `knowledge/playbooks/{playbook_id}/` (type: `playbook`) — references atoms by ID in `traversal:` |
 | A new RAG recipe | Append to `knowledge/recipes/{domain}_recipes.md` using `Q\n\n==> Execute X: ...` format with triple-newline separator |
-| A new chat template | Create `knowledge/templates/{template_id}/` (type: `template`) |
-| A new report section | Create `knowledge/output_specs/{section_id}/` (type: `output_spec`) |
+| A new chat template | Create `knowledge/chat_templates/{template_id}/` (type: `chat_template`) |
+| A new report section | Create `knowledge/report_sections/{section_id}/` (type: `report_section`) |
 
 ## The contract
 
 Every node folder has exactly two files:
 
 ```
-knowledge/concepts/osa/
+knowledge/metrics/osa/
 ├── _node.yaml      ← typed metadata (id, type, parent, related, etc.)
 └── content.md      ← the actual knowledge (free-form markdown)
 ```
@@ -38,18 +38,18 @@ See [`docs/content_types.md`](docs/content_types.md) for what each type is for.
 The `id:` must match the folder path (dot-separated):
 
 ```yaml
-id: "concepts.osa"
+id: "metrics.osa"
 name: "On-Shelf Availability (OSA)"
 description: "% of times a SKU is available across all stores it's listed in."
-type: concept
-parent: "concepts"
+type: metric
+parent: null
 related:
-  - id: "concepts.psl"
+  - id: "metrics.psl"
     relation: feeds_into
     label: "OSA gaps drive PSL"
-  - id: "thresholds.osa_health"
-    relation: cross_check
-    label: "Apply this threshold to classify OSA values"
+  - id: "benchmarks.osa_health"
+    relation: uses_benchmark
+    label: "Apply this benchmark to classify OSA values"
 primitives: [availability]
 common_questions:
   - "What is OSA?"
@@ -74,7 +74,7 @@ pytest tests/
 This runs:
 - Schema validation (every `_node.yaml` parses, has required fields)
 - Reference checks (every parent/child/related ID resolves)
-- Traversal checks (procedures terminate, no cycles)
+- Traversal checks (playbooks terminate, no cycles)
 - Bidirectional relation check
 
 ### 6. Open a PR
@@ -86,7 +86,7 @@ CI will re-run all checks. PRs cannot merge if any fail.
 When your PR merges:
 
 - **Patch** (most content edits, new individual atoms) — bump `0.x.Y`
-- **Minor** (new atom type, new procedure, new output spec) — bump `0.X.0`
+- **Minor** (new atom type, new playbook, new report_section) — bump `0.X.0`
 - **Major** (schema breaks, atom rename, loader API change) — bump `X.0.0`
 
 Apps will need to update their pinned version to pick up your change.
@@ -94,7 +94,7 @@ Apps will need to update their pinned version to pick up your change.
 ## What NOT to do
 
 - Don't edit two atoms to say the same thing — use a `related:` edge instead
-- Don't write decision trees inside `content.md` — use a `procedure` atom with `traversal:`
-- Don't put thresholds in concept atoms — make them their own `threshold` atoms so they can be reused
-- Don't copy SQL into multiple recipes — extract the shared part into a recipe and reference it
+- Don't write decision trees inside `content.md` — use a `playbook` atom with `traversal:`
+- Don't put bands in metric atoms — make them their own `benchmark` atoms so they can be reused
+- Don't copy SQL into multiple recipes — extract the shared part into a `diagnostic` atom and reference it
 - Don't skip `bidirectional` relations — the validator will fail your PR

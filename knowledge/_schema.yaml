@@ -6,7 +6,7 @@
 # Validators in tests/test_schema.py enforce these constraints on every PR.
 
 required_fields:
-  - id           # Dot-path matching folder path (e.g. "concepts.osa")
+  - id           # Dot-path matching folder path (e.g. "metrics.osa")
   - name         # Human-readable display name
   - description  # One-line description (under 100 chars; used in planner tool schema)
   - type         # One of node_types below
@@ -19,45 +19,45 @@ optional_fields:
   - primitives         # Tags: availability, visibility, pricing
   - common_questions   # User queries that route here (helps with testing)
   - planner_hint       # When the planner should select this node
-  - traversal          # REQUIRED for procedure nodes — list of typed steps
-  - sql                # OPTIONAL for detection nodes — SQL fragment that detects the pattern
-  - thresholds         # OPTIONAL for threshold nodes — value bands
-  - sections           # OPTIONAL for output_spec nodes — ordered list of section specs
+  - traversal          # REQUIRED for playbook nodes — list of typed steps
+  - sql                # OPTIONAL for diagnostic nodes — SQL fragment that detects the pattern
+  - thresholds         # OPTIONAL for benchmark nodes — value bands
+  - sections           # OPTIONAL for report_section nodes — ordered list of section specs
 
 node_types:
   # Existing GoBIQ types (kept):
-  - global       # Always auto-loaded (narration rules, eval rubric)
-  - category     # Organizational grouping with no own content (e.g. domains/, templates/)
-  - template     # Chat-layer template (e.g. growth_diagnosis Layer 0+1 shape)
-  - domain       # Major analytics domain (supply_chain, brand_growth, etc.)
-  - topic        # Specific analysis topic within a domain
-  - procedure    # Typed traversal — a decision tree of references to other atoms
+  - global          # Always auto-loaded (narration rules, eval rubric)
+  - category        # Organizational grouping with no own content (e.g. domains/, chat_templates/)
+  - chat_template   # Chat-layer template (e.g. growth_diagnosis Layer 0+1 shape)
+  - domain          # Major analytics domain (supply_chain, brand_growth, etc.)
+  - topic           # Specific analysis topic within a domain
 
-  # New types added for the merged repo:
-  - concept      # Atomic definition of one metric or term (e.g. osa, psl)
-  - detection    # SQL fragment + threshold that identifies a pattern
-  - threshold    # Value bands for a metric (healthy/warning/critical)
-  - output_spec  # Report section spec consumed by the report assembler
-  - recipe       # RAG-indexed Q→Action pair (lives inside recipes/*.md, not as a folder)
+  # New types added for the merged repo (Option B taxonomy):
+  - metric          # Atomic definition of one metric (e.g. osa, psl)
+  - diagnostic      # SQL fragment + threshold that identifies a pattern (e.g. transfer_issue)
+  - benchmark       # Value bands for a metric (healthy/warning/critical)
+  - playbook        # Typed traversal — a decision tree of references to other atoms
+  - report_section  # Report section spec consumed by the report assembler
+  - recipe          # RAG-indexed Q→Action pair (lives inside recipes/*.md, not as a folder)
 
 relation_types:
   - next_action     # After diagnosing X, do Y
   - root_cause      # X is caused by Y
   - cross_check     # Validate X against Y
   - uses_template   # X follows template Y
-  - uses_threshold  # X classifies values via threshold Y
+  - uses_benchmark  # X classifies values via benchmark Y
   - feeds_into      # Data from X flows into Y
   - triggered_by    # X is triggered when Y fires
   - composes        # Procedure X composes atoms A, B, C into a workflow
-  - rendered_by     # Atom X is rendered into reports by output_spec Y
+  - rendered_by     # Atom X is rendered into reports by report_section Y
 
-# Procedure traversal step types:
+# Playbook traversal step types:
 traversal_step_types:
-  - run_detection      # Execute a detection rule (returns true/false)
+  - run_diagnostic     # Execute a diagnostic rule (returns true/false)
   - fetch_data         # Run a recipe to fetch data
   - branch             # if/else based on a condition
-  - render             # Render a concept/detection/threshold into output
-  - call_procedure     # Recursively call another procedure
+  - render             # Render a metric / diagnostic / benchmark into output
+  - call_playbook      # Recursively call another playbook
   - terminate          # End the traversal (with verdict)
 
 # Primitive tags (for filtering / planner):

@@ -20,7 +20,7 @@
        │  uses chat         │                │  uses report         │
        │  assembler         │                │  assembler           │
        │                    │                │                      │
-       │  depth-1 retrieval │                │  full procedure      │
+       │  depth-1 retrieval │                │  full playbook       │
        │  per turn          │                │  walks → HTML/PDF    │
        └────────────────────┘                └──────────────────────┘
 ```
@@ -46,9 +46,9 @@ See [`content_types.md`](content_types.md) for the full catalog.
 
 The key distinction:
 
-- **Concept / detection / threshold** atoms hold *what something is* (definitions, formulas, SQL, bands)
-- **Procedure** atoms hold *how to diagnose* (typed traversals that reference the above)
-- **Output_spec** atoms hold *how to render* (which procedures compose into which report sections, with what CSS)
+- **Metric / diagnostic / benchmark** atoms hold *what something is* (definitions, formulas, SQL, bands)
+- **Playbook** atoms hold *how to diagnose* (typed traversals that reference the above)
+- **Report_section** atoms hold *how to render* (which playbooks compose into which report sections, with what CSS)
 - **Domain / topic** atoms are the existing GoBIQ subject-area tree (overview content + planner exposure)
 - **Recipe** atoms are RAG-indexed Q→Action pairs for fuzzy retrieval
 
@@ -58,13 +58,13 @@ Atoms link via typed edges in `_node.yaml`'s `related:` list:
 
 ```yaml
 related:
-  - id: "concepts.psl"
+  - id: "metrics.psl"
     relation: feeds_into
     label: "OSA gaps drive PSL"
 ```
 
 Relation types: `next_action`, `root_cause`, `cross_check`, `uses_template`,
-`uses_threshold`, `feeds_into`, `triggered_by`, `composes`, `rendered_by`.
+`uses_benchmark`, `feeds_into`, `triggered_by`, `composes`, `rendered_by`.
 
 Relations are bidirectional — if A says `related: B`, B should say `related: A`.
 The reference checker enforces this.
@@ -98,15 +98,15 @@ from gobiq_knowledge.assemblers.report import assemble_report
 
 report = assemble_report(
     graph,
-    output_spec_id="output_specs.availability_section",
+    report_section_id="report_sections.availability_section",
     data_fetcher=my_data_fetcher,  # callback that runs SQL / reads Excel
 )
 html = report.to_html()
 ```
 
-The assembler walks the output_spec's referenced procedures end-to-end. The
+The assembler walks the report_section's referenced playbooks end-to-end. The
 consumer supplies a `data_fetcher` callback for steps that need real data
-(`run_detection`, `fetch_data`).
+(`run_diagnostic`, `fetch_data`).
 
 ## Why the consumer owns data fetching
 
@@ -118,7 +118,7 @@ loader. The assembler stays portable.
 
 See [`/CHANGELOG.md`](../CHANGELOG.md) for what's done. Migration order:
 
-1. **Phase 0** — Lift GoBIQ's existing `domains/`, `recipes/`, `templates/`,
+1. **Phase 0** — Lift GoBIQ's existing `domains/`, `recipes/`, `chat_templates/`,
    `global/` content into this repo. Refactor GoBIQ chat to import from the
    package. Behavior-preserving.
 2. **Phase 1** — Add new atom types in schema (done). Author starter atoms (done).

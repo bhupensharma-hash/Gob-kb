@@ -1,16 +1,16 @@
-# templates/
+# chat_templates/
 
 Chat-layer templates — Layer 0+1 shapes for specific question patterns.
-Used by the chat assembler when the planner picks a template node.
+Used by the chat assembler when the planner picks a chat_template node.
 
 ## Existing templates (after migration from GoBIQ)
 
 - `growth_diagnosis/` — for "why is my growth/decline X" questions
 - `competitive_intelligence/` — for "what are competitors doing" questions
 
-Each template is a folder with `_node.yaml` (type: `template`) + `content.md`.
+Each template is a folder with `_node.yaml` (type: `chat_template`) + `content.md`.
 The `content.md` defines the trigger queries, analyst mindset, Layer 0+1
 structure, and Layer 2 deep-dive paths.
 
-See [`/docs/content_types.md`](../../docs/content_types.md) for the template
+See [`/docs/content_types.md`](../../docs/content_types.md) for the chat_template
 content contract.

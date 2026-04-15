@@ -1,0 +1,29 @@
+id: "report_sections.availability_section"
+name: "Availability — Report Section Spec"
+description: "Defines how the availability section of a report is assembled by walking playbooks."
+type: report_section
+parent: null
+related:
+  - id: "playbooks.availability_diagnosis"
+    relation: composes
+    label: "This section walks the availability_diagnosis playbook"
+primitives: [availability]
+common_questions: []
+expose_to_planner: false
+
+# Report-section-specific: ordered list of sections.
+# Each section references a playbook that the report assembler will walk.
+sections:
+  - id: availability_overview
+    title: "Availability Overview"
+    playbook: playbooks.availability_diagnosis
+    layout: full_width
+    css_class: report-availability-overview
+
+  # Future sections (to add as more playbooks land):
+  # - id: psl_breakdown
+  #   title: "PSL by Facility"
+  #   playbook: playbooks.psl_breakdown_by_facility
+  # - id: action_plan
+  #   title: "Action Plan"
+  #   playbook: playbooks.availability_action_plan

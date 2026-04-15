@@ -19,7 +19,7 @@ This repo is the merged source. Both apps depend on it as a versioned Python pac
         ┌───────────────┐                ┌───────────────┐
         │  GoBIQ chat   │                │ GoBIQ report  │
         │  (1-2 atoms   │                │  (full        │
-        │   per turn)   │                │   procedure   │
+        │   per turn)   │                │   playbook    │
         │               │                │   walks)      │
         └───────────────┘                └───────────────┘
 ```
@@ -35,14 +35,14 @@ This repo is the merged source. Both apps depend on it as a versioned Python pac
 
 | Type | Purpose |
 |---|---|
-| `concept` | Definition + formula of one metric or term (e.g. `osa`, `psl`) |
-| `detection` | SQL fragment + threshold that identifies a pattern |
-| `threshold` | Value bands tagged to a metric (healthy/warning/critical) |
+| `metric` | Definition + formula of one metric (e.g. `osa`, `psl`) |
+| `diagnostic` | SQL fragment + threshold that identifies a pattern |
+| `benchmark` | Value bands tagged to a metric (healthy/warning/critical) |
 | `domain` / `topic` | Subject-area knowledge (the existing GoBIQ tree) |
-| `procedure` | Typed traversal — decision tree of nodes |
+| `playbook` | Typed traversal — decision tree of nodes |
 | `recipe` | Q→Action pairs ingested into Milvus for RAG |
-| `template` | Chat-layer specs (Layer 0+1 shapes) |
-| `output_spec` | Report section specs consumed by the report assembler |
+| `chat_template` | Chat-layer specs (Layer 0+1 shapes) |
+| `report_section` | Report section specs consumed by the report assembler |
 | `global` | Always-loaded content (narration rules, eval rubric) |
 
 See [`docs/content_types.md`](docs/content_types.md) for full details.
@@ -52,7 +52,7 @@ See [`docs/content_types.md`](docs/content_types.md) for full details.
 In your consuming app:
 
 ```bash
-pip install gobiq-knowledge @ git+ssh://git@github.com/gobblecube/gobiq-knowledge.git@v0.1.0
+pip install gobiq-knowledge @ git+ssh://git@github.com/gobblecube/gobiq-knowledge.git@v0.2.0
 ```
 
 ## Usage
@@ -80,7 +80,7 @@ from gobiq_knowledge.assemblers.report import assemble_report
 graph = load()
 html = assemble_report(
     graph,
-    output_spec_id="output_specs.availability_section",
+    report_section_id="report_sections.availability_section",
     data_source="path/to/04_analysis.xlsx",
 )
 ```
@@ -98,7 +98,7 @@ Semantic versioning, strict:
 | Bump | When |
 |---|---|
 | **Major** | Schema breaks, atom type renamed, loader API changes |
-| **Minor** | New atom type, new procedure, new output spec |
-| **Patch** | Content edits, threshold tweaks, new individual atoms |
+| **Minor** | New atom type, new playbook, new report_section |
+| **Patch** | Content edits, benchmark tweaks, new individual atoms |
 
 Apps pin a version. No surprise content changes in production.

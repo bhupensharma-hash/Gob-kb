@@ -1,4 +1,4 @@
-# Availability Diagnosis Procedure
+# Availability Diagnosis Playbook
 
 ## Mindset
 
@@ -34,11 +34,11 @@ to the next 2-3 steps in the traversal.
 
 The report assembler walks **all steps in sequence**, rendering each into a
 sub-section of the availability report section. See
-`output_specs.availability_section`.
+`report_sections.availability_section`.
 
 ## Status
 
-This is a **starter** procedure. The full Case 1 sub-tree
-(`procedures.availability_diagnosis_listing_branch`) and the PO/fill-rate
+This is a **starter** playbook. The full Case 1 sub-tree
+(`playbooks.availability_diagnosis_listing_branch`) and the PO/fill-rate
 sub-trees are placeholder references — to be added during migration of
 strategy-agent-core's `availability_deep_dive.md` into atomic form.

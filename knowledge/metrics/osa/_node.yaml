@@ -1,16 +1,16 @@
-id: "concepts.osa"
+id: "metrics.osa"
 name: "On-Shelf Availability (OSA)"
 description: "% of times a SKU is available across all stores it is listed in."
-type: concept
+type: metric
 parent: null
 related:
-  - id: "concepts.psl"
+  - id: "metrics.psl"
     relation: feeds_into
     label: "OSA gaps drive PSL"
-  - id: "thresholds.osa_health"
-    relation: uses_threshold
-    label: "Apply this threshold to classify OSA values"
-  - id: "detections.transfer_issue"
+  - id: "benchmarks.osa_health"
+    relation: uses_benchmark
+    label: "Apply this benchmark to classify OSA values"
+  - id: "diagnostics.transfer_issue"
     relation: cross_check
     label: "Low OSA may indicate a transfer issue"
 primitives: [availability]

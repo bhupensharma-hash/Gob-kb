@@ -1,9 +1,9 @@
 """
-Report assembler — depth-N walk that executes an output_spec into a rendered report.
+Report assembler — depth-N walk that executes a report_section into a rendered report.
 
-Given an output_spec_id, this:
-  1. Loads the output_spec atom (defines section order + procedure references)
-  2. For each section, walks the referenced procedure's traversal end-to-end
+Given a report_section_id, this:
+  1. Loads the report_section atom (defines section order + playbook references)
+  2. For each section, walks the referenced playbook's traversal end-to-end
   3. Composes atom contents into HTML using the referenced CSS framework atom
   4. Returns the assembled HTML string
 
@@ -12,7 +12,7 @@ SAME knowledge graph drive batch report generation in addition to chat.
 
 Design note: data execution (running SQL, fetching from Excel) is left to the
 consuming app. This assembler returns a structured report tree; the consumer
-plugs in real values where the procedure says `fetch_data` or `run_detection`.
+plugs in real values where the playbook says `fetch_data` or `run_diagnostic`.
 
 This module ships a SKELETON. Replace the stub renderers with real
 implementations as you migrate report sections from strategy-agent-core.
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 # Type alias for the data-fetch callback the consumer must supply.
-# Given a recipe action string, returns whatever data the SQL/tool produced.
+# Given a recipe action string or SQL fragment, returns whatever data the tool produced.
 DataFetcher = Callable[[str], Any]
 
 
@@ -48,7 +48,7 @@ class RenderedSection:
 class AssembledReport:
     """The full report, ready to serialize to HTML/PDF."""
 
-    output_spec_id: str
+    report_section_id: str
     title: str
     sections: List[RenderedSection]
     css: str
@@ -71,27 +71,27 @@ class AssembledReport:
 
 def assemble_report(
     graph: KnowledgeGraph,
-    output_spec_id: str,
+    report_section_id: str,
     data_fetcher: Optional[DataFetcher] = None,
 ) -> AssembledReport:
     """
-    Assemble a report by walking an output_spec through its referenced procedures.
+    Assemble a report by walking a report_section through its referenced playbooks.
 
     Args:
         graph: A loaded KnowledgeGraph.
-        output_spec_id: The dot-path ID of the output_spec atom.
+        report_section_id: The dot-path ID of the report_section atom.
         data_fetcher: Callback invoked for traversal steps that need real data
-                      (run_detection, fetch_data). Required for production reports.
+                      (run_diagnostic, fetch_data). Required for production reports.
 
     Returns:
         An AssembledReport ready to render as HTML.
     """
-    spec = graph.get_node(output_spec_id)
+    spec = graph.get_node(report_section_id)
     if not spec:
-        raise ValueError(f"Unknown output_spec: {output_spec_id}")
-    if spec.type != "output_spec":
+        raise ValueError(f"Unknown report_section: {report_section_id}")
+    if spec.type != "report_section":
         raise ValueError(
-            f"Node {output_spec_id} is type '{spec.type}', expected 'output_spec'"
+            f"Node {report_section_id} is type '{spec.type}', expected 'report_section'"
         )
 
     # Resolve CSS framework if referenced
@@ -104,7 +104,7 @@ def assemble_report(
             sections.append(rendered)
 
     return AssembledReport(
-        output_spec_id=output_spec_id,
+        report_section_id=report_section_id,
         title=spec.name,
         sections=sections,
         css=css,
@@ -116,11 +116,11 @@ def assemble_report(
 # ---------------------------------------------------------------------- #
 
 def _resolve_css(graph: KnowledgeGraph, spec: KnowledgeNode) -> str:
-    """Pull CSS from the output_spec's `uses_template` related-edge if present."""
+    """Pull CSS from the report_section's `uses_template` related-edge if present."""
     for rel in spec.related:
         if rel.get("relation") == "uses_template":
             css_node = graph.get_node(rel.get("id", ""))
-            if css_node and css_node.type == "output_spec":
+            if css_node and css_node.type == "report_section":
                 return graph.get_content(css_node.id)
     return ""
 
@@ -130,28 +130,28 @@ def _render_section(
     section_def: Dict[str, Any],
     data_fetcher: Optional[DataFetcher],
 ) -> Optional[RenderedSection]:
-    """Render one section of an output_spec by walking its referenced procedure."""
+    """Render one section by walking its referenced playbook."""
     section_id = section_def.get("id", "unnamed_section")
     title = section_def.get("title", section_id)
-    procedure_id = section_def.get("procedure")
+    playbook_id = section_def.get("playbook")
 
-    if not procedure_id:
+    if not playbook_id:
         return RenderedSection(
             section_id=section_id,
             title=title,
             html=f"<section><h2>{_escape(title)}</h2></section>",
         )
 
-    procedure = graph.get_node(procedure_id)
-    if not procedure or procedure.type != "procedure":
+    playbook = graph.get_node(playbook_id)
+    if not playbook or playbook.type != "playbook":
         logger.warning(
-            "Section %s references missing procedure %s", section_id, procedure_id
+            "Section %s references missing playbook %s", section_id, playbook_id
         )
         return None
 
-    # Walk the procedure's traversal.
+    # Walk the playbook's traversal.
     body_blocks: List[str] = []
-    for step in procedure.traversal:
+    for step in playbook.traversal:
         block = _execute_step(graph, step, data_fetcher)
         if block:
             body_blocks.append(block)
@@ -173,11 +173,11 @@ def _execute_step(
     Execute one traversal step. Returns an HTML fragment.
 
     Step types (from knowledge/_schema.yaml traversal_step_types):
-      - run_detection: Execute a detection rule (returns true/false)
+      - run_diagnostic: Execute a diagnostic rule (returns true/false)
       - fetch_data: Run a recipe to fetch data
       - branch: if/else based on a condition
-      - render: Render a concept/detection/threshold into output
-      - call_procedure: Recursively call another procedure
+      - render: Render a metric / diagnostic / benchmark into output
+      - call_playbook: Recursively call another playbook
       - terminate: End the traversal
     """
     step_type = step.get("step")
@@ -190,12 +190,12 @@ def _execute_step(
             return f"<div class='atom-{target.type}'><h3>{_escape(target.name)}</h3>\n{_md_to_html(content)}\n</div>"
         return ""
 
-    if step_type == "run_detection" and data_fetcher:
+    if step_type == "run_diagnostic" and data_fetcher:
         target = graph.get_node(target_id) if target_id else None
         if target and target.sql:
             try:
                 result = data_fetcher(target.sql)
-                return f"<div class='detection-result'>{_escape(str(result))}</div>"
+                return f"<div class='diagnostic-result'>{_escape(str(result))}</div>"
             except Exception as exc:
                 logger.error("Data fetch failed for %s: %s", target_id, exc)
         return ""
@@ -209,9 +209,9 @@ def _execute_step(
             logger.error("Data fetch failed: %s", exc)
         return ""
 
-    if step_type == "call_procedure":
+    if step_type == "call_playbook":
         sub = graph.get_node(target_id) if target_id else None
-        if sub and sub.type == "procedure":
+        if sub and sub.type == "playbook":
             sub_blocks = [
                 _execute_step(graph, s, data_fetcher) for s in sub.traversal
             ]

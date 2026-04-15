@@ -9,26 +9,26 @@ The 11 atom types in `gobiq-knowledge`, what they're for, and what their
 |---|---|---|---|
 | `global` | Always-loaded content | `knowledge/global/` | `false` |
 | `category` | Organizational grouping (no own content) | `knowledge/{type}/_node.yaml` | `false` |
-| `template` | Chat-layer template | `knowledge/templates/` | `true` |
+| `chat_template` | Chat-layer template | `knowledge/chat_templates/` | `true` |
 | `domain` | Major analytics domain | `knowledge/domains/{domain}/` | `true` |
 | `topic` | Specific topic within a domain | `knowledge/domains/{domain}/{topic}/` | `true` |
-| `procedure` | Typed traversal (decision tree) | `knowledge/procedures/` | `true` |
-| `concept` | Metric or term definition | `knowledge/concepts/` | `true` |
-| `detection` | SQL fragment + threshold for a pattern | `knowledge/detections/` | `true` |
-| `threshold` | Value bands for a metric | `knowledge/thresholds/` | `true` |
-| `output_spec` | Report section spec (report assembler only) | `knowledge/output_specs/` | `false` |
+| `playbook` | Typed traversal (decision tree) | `knowledge/playbooks/` | `true` |
+| `metric` | Metric definition + formula | `knowledge/metrics/` | `true` |
+| `diagnostic` | SQL fragment + threshold for a pattern | `knowledge/diagnostics/` | `true` |
+| `benchmark` | Value bands for a metric | `knowledge/benchmarks/` | `true` |
+| `report_section` | Report section spec (report assembler only) | `knowledge/report_sections/` | `false` |
 | `recipe` | RAG-indexed Q→Action pair | inside `knowledge/recipes/*.md` | n/a |
 
 ## Detailed specs
 
-### `concept`
+### `metric`
 
-**What it holds:** the definition + formula of one metric or term.
+**What it holds:** the definition + formula of one metric.
 
 `content.md` template:
 
 ```markdown
-# {Concept Name}
+# {Metric Name}
 
 ## Definition
 [1-2 sentences explaining what this is]
@@ -46,7 +46,7 @@ The 11 atom types in `gobiq-knowledge`, what they're for, and what their
 [Things that go wrong when computing this]
 ```
 
-### `detection`
+### `diagnostic`
 
 **What it holds:** SQL fragment + threshold that identifies a pattern (transfer
 issue, missing PO, etc.).
@@ -56,10 +56,10 @@ Required `_node.yaml` field: `sql:` (the SQL fragment).
 `content.md` template:
 
 ```markdown
-# {Detection Name}
+# {Diagnostic Name}
 
 ## What it identifies
-[The pattern this detection catches]
+[The pattern this diagnostic catches]
 
 ## Detection conditions
 [Bullet list of all conditions that must be true]
@@ -68,7 +68,7 @@ Required `_node.yaml` field: `sql:` (the SQL fragment).
 [Why the thresholds are what they are]
 
 ## Loss extrapolation
-[How to convert the detection into a ₹ loss number]
+[How to convert the diagnostic into a ₹ loss number]
 
 ## Ownership
 [Who owns the fix]
@@ -77,7 +77,7 @@ Required `_node.yaml` field: `sql:` (the SQL fragment).
 [What causes this pattern]
 ```
 
-### `threshold`
+### `benchmark`
 
 **What it holds:** value bands for classifying a metric (healthy / warning / critical).
 
@@ -86,7 +86,7 @@ Required `_node.yaml` field: `thresholds:` (list of bands).
 `content.md` template:
 
 ```markdown
-# {Threshold Name}
+# {Benchmark Name}
 
 ## Bands
 [Table: band, range, color, action]
@@ -98,7 +98,7 @@ Required `_node.yaml` field: `thresholds:` (list of bands).
 [How to apply these in practice]
 ```
 
-### `procedure`
+### `playbook`
 
 **What it holds:** a typed traversal — a decision tree expressed as a
 sequence of steps that reference other atoms.
@@ -108,15 +108,15 @@ Required `_node.yaml` field: `traversal:` (list of typed steps).
 Step types:
 - `render` — render an atom into the output (ref required)
 - `fetch_data` — run a recipe / SQL to get real values (consumer evaluates)
-- `run_detection` — run a detection rule (returns true/false)
+- `run_diagnostic` — run a diagnostic rule (returns true/false)
 - `branch` — if/else (with `if_true:` and `if_false:` arms)
-- `call_procedure` — recursive call (ref required)
+- `call_playbook` — recursive call (ref required)
 - `terminate` — end the traversal (with verdict template)
 
 `content.md` template:
 
 ```markdown
-# {Procedure Name}
+# {Playbook Name}
 
 ## Mindset
 [How the analyst should think about this]
@@ -131,9 +131,9 @@ Step types:
 [What the user sees in the report section]
 ```
 
-### `output_spec`
+### `report_section`
 
-**What it holds:** which procedures compose into which report sections, in
+**What it holds:** which playbooks compose into which report sections, in
 what order, with what CSS framework. Consumed only by the report assembler.
 
 Required `_node.yaml` field: `sections:` (ordered list of section specs).
@@ -144,7 +144,7 @@ Required `_node.yaml` field: `sections:` (ordered list of section specs).
 # {Section Name} — Report Section Spec
 
 ## Composition
-[Which procedures this section walks]
+[Which playbooks this section walks]
 
 ## Style guide for this section
 [Section-specific narration rules — owner attribution, headline first, etc.]
@@ -158,10 +158,10 @@ Required `_node.yaml` field: `sections:` (ordered list of section specs).
 These match GoBIQ's existing structure exactly. See
 [`/knowledge/domains/README.md`](../knowledge/domains/README.md).
 
-### `template`
+### `chat_template`
 
 Chat-layer templates for question patterns. See
-[`/knowledge/templates/README.md`](../knowledge/templates/README.md).
+[`/knowledge/chat_templates/README.md`](../knowledge/chat_templates/README.md).
 
 ### `global`
 

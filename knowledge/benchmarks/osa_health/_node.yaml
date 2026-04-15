@@ -1,19 +1,19 @@
-id: "thresholds.osa_health"
-name: "OSA Health Thresholds"
+id: "benchmarks.osa_health"
+name: "OSA Health Benchmark"
 description: "Bands for classifying OSA values as healthy / warning / critical."
-type: threshold
+type: benchmark
 parent: null
 related:
-  - id: "concepts.osa"
+  - id: "metrics.osa"
     relation: cross_check
-    label: "Apply these thresholds to OSA metric values"
+    label: "Apply these bands to OSA metric values"
 primitives: [availability]
 common_questions:
   - "What is a good OSA?"
   - "When should I flag OSA as critical?"
 expose_to_planner: true
 
-# Threshold-specific: the bands.
+# Benchmark-specific: the bands.
 thresholds:
   - band: healthy
     range: ">= 90"

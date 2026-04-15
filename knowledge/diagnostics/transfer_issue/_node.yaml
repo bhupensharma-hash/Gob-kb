@@ -1,18 +1,18 @@
-id: "detections.transfer_issue"
-name: "Transfer Issue Detection"
+id: "diagnostics.transfer_issue"
+name: "Transfer Issue Diagnostic"
 description: "Identifies SKUs where backend warehouse has stock but front-end stores don't."
-type: detection
+type: diagnostic
 parent: null
 related:
-  - id: "concepts.osa"
+  - id: "metrics.osa"
     relation: cross_check
     label: "Low frontend OSA is the symptom"
-  - id: "concepts.psl"
+  - id: "metrics.psl"
     relation: feeds_into
     label: "PSL quantifies the revenue impact of unresolved transfer issues"
   - id: "domains.supply_chain.transfer_issues"
     relation: composes
-    label: "This detection underpins the transfer_issues topic"
+    label: "This diagnostic underpins the transfer_issues topic"
 primitives: [availability]
 common_questions:
   - "Why is stock stuck in the warehouse?"
@@ -22,7 +22,7 @@ planner_hint: >-
   is caused by inventory failing to transfer from backend warehouse to dark stores.
 expose_to_planner: true
 
-# Detection-specific: the SQL fragment that identifies the pattern.
+# Diagnostic-specific: the SQL fragment that identifies the pattern.
 sql: |
   SELECT
     facility_id,

@@ -14,10 +14,10 @@ How to add new atoms to `gobiq-knowledge`.
 ### 1. Create the folder + `_node.yaml`
 
 Folder lives under `knowledge/{type}/{id}/`. The `id:` must match the folder
-path exactly (dot-separated). Example for a new concept:
+path exactly (dot-separated). Example for a new metric:
 
 ```
-knowledge/concepts/market_share/
+knowledge/metrics/market_share/
 ├── _node.yaml
 └── content.md
 ```
@@ -25,13 +25,13 @@ knowledge/concepts/market_share/
 `_node.yaml`:
 
 ```yaml
-id: "concepts.market_share"
+id: "metrics.market_share"
 name: "Market Share"
 description: "% of category offtake captured by a brand, partitioned by platform × period."
-type: concept
+type: metric
 parent: null
 related:
-  - id: "concepts.osa"
+  - id: "metrics.osa"
     relation: feeds_into
     label: "OSA drops can cause market share losses"
 primitives: [availability]   # or visibility / pricing
@@ -48,7 +48,7 @@ expose_to_planner: true
 
 Use the template for your atom type — see [`content_types.md`](content_types.md).
 
-Keep it tight. One concept per atom. If you find yourself documenting two
+Keep it tight. One metric per atom. If you find yourself documenting two
 metrics in one file, split them.
 
 ### 3. Add bidirectional relations
@@ -67,7 +67,7 @@ pytest
 All three test suites must pass:
 - `test_schema.py` — schema validates
 - `test_references.py` — refs resolve, relations are symmetric
-- `test_traversals.py` — procedures terminate
+- `test_traversals.py` — playbooks terminate
 
 ### 5. Update `CHANGELOG.md`
 
@@ -81,18 +81,18 @@ CI re-runs all checks. PR cannot merge if any fail.
 
 Once merged to `main`:
 - Patch (most content edits): `0.X.Y → 0.X.Y+1`
-- Minor (new atom type, procedure, output spec): `0.X.0 → 0.X+1.0`
+- Minor (new atom type, playbook, report_section): `0.X.0 → 0.X+1.0`
 - Major (schema break): `X.0.0 → X+1.0.0`
 
-Tag the release: `git tag v0.1.1 && git push --tags`. CI publishes.
+Tag the release: `git tag v0.2.1 && git push --tags`. CI publishes.
 
 ## Anti-patterns
 
-- **Writing decision trees inside `content.md`.** Use a `procedure` atom.
-- **Putting thresholds inside `concept` atoms.** Make a `threshold` atom and
-  link via `uses_threshold`.
+- **Writing decision trees inside `content.md`.** Use a `playbook` atom.
+- **Putting bands inside `metric` atoms.** Make a `benchmark` atom and
+  link via `uses_benchmark`.
 - **Copying SQL into multiple recipes.** Extract the shared SQL fragment into
-  a `detection` atom and reference it.
+  a `diagnostic` atom and reference it.
 - **Skipping `related:` because "it's obvious."** Future authors don't have
   your context. Make it explicit.
 - **Creating a new `domain/` for one topic.** Topics live under existing
@@ -101,6 +101,6 @@ Tag the release: `git tag v0.1.1 && git push --tags`. CI publishes.
 ## Getting reviewed
 
 - Schema validators are not enough. Have a domain expert review the `content.md`.
-- For new procedures, walk through the traversal verbally with a strategist —
+- For new playbooks, walk through the traversal verbally with a strategist —
   does the decision tree match how they actually diagnose this?
 - For new recipes, confirm the SQL works against the actual Snowflake schema.

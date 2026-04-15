@@ -1,4 +1,4 @@
-# Transfer Issue Detection
+# Transfer Issue Diagnostic
 
 ## What it identifies
 

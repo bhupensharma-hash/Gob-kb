@@ -1,4 +1,4 @@
-# OSA Health Thresholds
+# OSA Health Benchmark
 
 ## Bands
 

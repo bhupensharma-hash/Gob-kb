@@ -1,15 +1,15 @@
-id: "concepts.psl"
+id: "metrics.psl"
 name: "Potential Sales Loss (PSL)"
 description: "Estimated revenue lost when a SKU is unavailable at a store that would have sold it."
-type: concept
+type: metric
 parent: null
 related:
-  - id: "concepts.osa"
+  - id: "metrics.osa"
     relation: triggered_by
     label: "PSL increases when OSA drops"
-  - id: "thresholds.psl_priority"
-    relation: uses_threshold
-    label: "Apply this threshold to classify PSL severity"
+  - id: "benchmarks.psl_priority"
+    relation: uses_benchmark
+    label: "Apply this benchmark to classify PSL severity"
 primitives: [availability]
 common_questions:
   - "What is PSL?"

@@ -1,18 +1,18 @@
-id: "procedures.availability_diagnosis"
-name: "Availability Diagnosis Procedure"
+id: "playbooks.availability_diagnosis"
+name: "Availability Diagnosis Playbook"
 description: "Decision tree for diagnosing OSA drops — splits listing vs inventory, then routes to root cause."
-type: procedure
+type: playbook
 parent: null
 related:
-  - id: "concepts.osa"
+  - id: "metrics.osa"
     relation: composes
-    label: "Procedure operates on OSA values"
-  - id: "concepts.psl"
+    label: "Playbook operates on OSA values"
+  - id: "metrics.psl"
     relation: composes
-    label: "Procedure quantifies impact via PSL"
-  - id: "detections.transfer_issue"
+    label: "Playbook quantifies impact via PSL"
+  - id: "diagnostics.transfer_issue"
     relation: composes
-    label: "One of the leaf cases this procedure routes to"
+    label: "One of the leaf cases this playbook routes to"
 primitives: [availability]
 common_questions:
   - "Why did my OSA drop?"
@@ -20,15 +20,15 @@ common_questions:
   - "Why is my product out of stock?"
 planner_hint: >-
   Use when the user reports an OSA drop or asks for a root-cause walkthrough
-  of an availability problem. The procedure sequences the diagnosis end-to-end.
+  of an availability problem. The playbook sequences the diagnosis end-to-end.
 expose_to_planner: true
 
-# Procedure-specific: the typed traversal.
+# Playbook-specific: the typed traversal.
 # Each step references atoms by ID. The chat assembler executes one step per
 # turn; the report assembler walks all steps in sequence.
 traversal:
   - step: render
-    ref: concepts.osa
+    ref: metrics.osa
     note: "Restate what OSA is and which formula was applied."
 
   - step: fetch_data
@@ -38,21 +38,21 @@ traversal:
   - step: branch
     condition: "DS_listing dropped > 10%"
     if_true:
-      - step: call_procedure
-        ref: procedures.availability_diagnosis_listing_branch
+      - step: call_playbook
+        ref: playbooks.availability_diagnosis_listing_branch
         note: "Listing issue — go to Case 1 sub-tree (placeholder)"
     if_false:
-      - step: run_detection
-        ref: detections.transfer_issue
+      - step: run_diagnostic
+        ref: diagnostics.transfer_issue
         note: "Inventory branch — first check transfer issue"
       - step: branch
         condition: "transfer issue detected"
         if_true:
           - step: render
-            ref: detections.transfer_issue
+            ref: diagnostics.transfer_issue
         if_false:
           - step: render
-            ref: concepts.psl
+            ref: metrics.psl
             note: "PSL but no transfer issue — likely PO or fill rate problem (next phase to be added)"
 
   - step: terminate
