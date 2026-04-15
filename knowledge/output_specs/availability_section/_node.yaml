@@ -1,0 +1,29 @@
+id: "output_specs.availability_section"
+name: "Availability — Report Section Spec"
+description: "Defines how the availability section of a report is assembled by walking procedures."
+type: output_spec
+parent: null
+related:
+  - id: "procedures.availability_diagnosis"
+    relation: composes
+    label: "This section walks the availability_diagnosis procedure"
+primitives: [availability]
+common_questions: []
+expose_to_planner: false
+
+# Output-spec-specific: ordered list of sections.
+# Each section references a procedure that the report assembler will walk.
+sections:
+  - id: availability_overview
+    title: "Availability Overview"
+    procedure: procedures.availability_diagnosis
+    layout: full_width
+    css_class: report-availability-overview
+
+  # Future sections (to add as more procedures land):
+  # - id: psl_breakdown
+  #   title: "PSL by Facility"
+  #   procedure: procedures.psl_breakdown_by_facility
+  # - id: action_plan
+  #   title: "Action Plan"
+  #   procedure: procedures.availability_action_plan

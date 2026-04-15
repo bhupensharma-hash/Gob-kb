@@ -1,0 +1,67 @@
+# gobiq-knowledge — Node Schema
+#
+# Every folder under knowledge/ that contains a _node.yaml file is a knowledge node.
+# This file defines the schema all _node.yaml files must conform to.
+#
+# Validators in tests/test_schema.py enforce these constraints on every PR.
+
+required_fields:
+  - id           # Dot-path matching folder path (e.g. "concepts.osa")
+  - name         # Human-readable display name
+  - description  # One-line description (under 100 chars; used in planner tool schema)
+  - type         # One of node_types below
+  - parent       # Parent node ID (null only for root-level categories)
+  - expose_to_planner  # Whether this node appears in the planner tool enum
+
+optional_fields:
+  - children           # Child node IDs (auto-populated by loader, but maintain for docs)
+  - related            # List of {id, relation, label} cross-links (bidirectional)
+  - primitives         # Tags: availability, visibility, pricing
+  - common_questions   # User queries that route here (helps with testing)
+  - planner_hint       # When the planner should select this node
+  - traversal          # REQUIRED for procedure nodes — list of typed steps
+  - sql                # OPTIONAL for detection nodes — SQL fragment that detects the pattern
+  - thresholds         # OPTIONAL for threshold nodes — value bands
+  - sections           # OPTIONAL for output_spec nodes — ordered list of section specs
+
+node_types:
+  # Existing GoBIQ types (kept):
+  - global       # Always auto-loaded (narration rules, eval rubric)
+  - category     # Organizational grouping with no own content (e.g. domains/, templates/)
+  - template     # Chat-layer template (e.g. growth_diagnosis Layer 0+1 shape)
+  - domain       # Major analytics domain (supply_chain, brand_growth, etc.)
+  - topic        # Specific analysis topic within a domain
+  - procedure    # Typed traversal — a decision tree of references to other atoms
+
+  # New types added for the merged repo:
+  - concept      # Atomic definition of one metric or term (e.g. osa, psl)
+  - detection    # SQL fragment + threshold that identifies a pattern
+  - threshold    # Value bands for a metric (healthy/warning/critical)
+  - output_spec  # Report section spec consumed by the report assembler
+  - recipe       # RAG-indexed Q→Action pair (lives inside recipes/*.md, not as a folder)
+
+relation_types:
+  - next_action     # After diagnosing X, do Y
+  - root_cause      # X is caused by Y
+  - cross_check     # Validate X against Y
+  - uses_template   # X follows template Y
+  - uses_threshold  # X classifies values via threshold Y
+  - feeds_into      # Data from X flows into Y
+  - triggered_by    # X is triggered when Y fires
+  - composes        # Procedure X composes atoms A, B, C into a workflow
+  - rendered_by     # Atom X is rendered into reports by output_spec Y
+
+# Procedure traversal step types:
+traversal_step_types:
+  - run_detection      # Execute a detection rule (returns true/false)
+  - fetch_data         # Run a recipe to fetch data
+  - branch             # if/else based on a condition
+  - render             # Render a concept/detection/threshold into output
+  - call_procedure     # Recursively call another procedure
+  - terminate          # End the traversal (with verdict)
+
+# Primitive tags (for filtering / planner):
+primitives:
+  - availability       # Stock, OSA, listing, distribution coverage
+  - visibility         # SOV, impressions, search rank, ad spend
+  - pricing            # MRP, ASP, PPU, price gaps, discounting

@@ -1,0 +1,29 @@
+id: "thresholds.osa_health"
+name: "OSA Health Thresholds"
+description: "Bands for classifying OSA values as healthy / warning / critical."
+type: threshold
+parent: null
+related:
+  - id: "concepts.osa"
+    relation: cross_check
+    label: "Apply these thresholds to OSA metric values"
+primitives: [availability]
+common_questions:
+  - "What is a good OSA?"
+  - "When should I flag OSA as critical?"
+expose_to_planner: true
+
+# Threshold-specific: the bands.
+thresholds:
+  - band: healthy
+    range: ">= 90"
+    color: green
+    label: "Healthy — no action needed"
+  - band: warning
+    range: "80 to 90"
+    color: amber
+    label: "Warning — investigate within a week"
+  - band: critical
+    range: "< 80"
+    color: red
+    label: "Critical — immediate attention"

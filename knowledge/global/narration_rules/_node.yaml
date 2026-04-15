@@ -1,0 +1,9 @@
+id: "global.narration_rules"
+name: "Global Narration Rules"
+description: "Voice, tone, and layered-response contract applied to every chat reply."
+type: global
+parent: null
+related: []
+primitives: []
+common_questions: []
+expose_to_planner: false

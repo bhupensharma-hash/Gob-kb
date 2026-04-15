@@ -1,0 +1,21 @@
+id: "concepts.psl"
+name: "Potential Sales Loss (PSL)"
+description: "Estimated revenue lost when a SKU is unavailable at a store that would have sold it."
+type: concept
+parent: null
+related:
+  - id: "concepts.osa"
+    relation: triggered_by
+    label: "PSL increases when OSA drops"
+  - id: "thresholds.psl_priority"
+    relation: uses_threshold
+    label: "Apply this threshold to classify PSL severity"
+primitives: [availability]
+common_questions:
+  - "What is PSL?"
+  - "How is potential sales loss calculated?"
+  - "How do I prioritize PSL across stores?"
+planner_hint: >-
+  Use when the user asks how revenue loss from stockouts is quantified,
+  or how to size an availability problem in rupees.
+expose_to_planner: true

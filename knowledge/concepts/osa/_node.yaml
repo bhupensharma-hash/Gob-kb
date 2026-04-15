@@ -1,0 +1,24 @@
+id: "concepts.osa"
+name: "On-Shelf Availability (OSA)"
+description: "% of times a SKU is available across all stores it is listed in."
+type: concept
+parent: null
+related:
+  - id: "concepts.psl"
+    relation: feeds_into
+    label: "OSA gaps drive PSL"
+  - id: "thresholds.osa_health"
+    relation: uses_threshold
+    label: "Apply this threshold to classify OSA values"
+  - id: "detections.transfer_issue"
+    relation: cross_check
+    label: "Low OSA may indicate a transfer issue"
+primitives: [availability]
+common_questions:
+  - "What is OSA?"
+  - "How is on-shelf availability calculated?"
+  - "What does weighted OSA mean?"
+planner_hint: >-
+  Use when the user asks for the definition of OSA, how it's calculated,
+  or the difference between weighted OSA and OSA on listed stores.
+expose_to_planner: true
