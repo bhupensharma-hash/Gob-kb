@@ -55,5 +55,13 @@ traversal:
             ref: metrics.psl
             note: "PSL but no transfer issue — likely PO or fill rate problem (next phase to be added)"
 
+  # Walk the causal chain from OSA to PSL — quantifies recovery opportunity.
+  # When more metric_relationship atoms exist (e.g. psl_drives_share_loss),
+  # change `to:` to metrics.market_share to walk the full chain.
+  - step: traverse_causes
+    from: metrics.osa
+    to: metrics.psl
+    render_each_link: true
+
   - step: terminate
     verdict_template: "Availability {direction} by {delta_pp}pp; root cause: {root_cause}; owner: {owner}."

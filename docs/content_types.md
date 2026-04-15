@@ -1,6 +1,6 @@
 # Atom Types
 
-The 11 atom types in `gobiq-knowledge`, what they're for, and what their
+The 12 atom types in `gobiq-knowledge`, what they're for, and what their
 `content.md` should contain.
 
 ## Quick reference table
@@ -14,6 +14,7 @@ The 11 atom types in `gobiq-knowledge`, what they're for, and what their
 | `topic` | Specific topic within a domain | `knowledge/domains/{domain}/{topic}/` | `true` |
 | `playbook` | Typed traversal (decision tree) | `knowledge/playbooks/` | `true` |
 | `metric` | Metric definition + formula | `knowledge/metrics/` | `true` |
+| `metric_relationship` | Causal link between two metrics | `knowledge/metric_relationships/` | `true` |
 | `diagnostic` | SQL fragment + threshold for a pattern | `knowledge/diagnostics/` | `true` |
 | `benchmark` | Value bands for a metric | `knowledge/benchmarks/` | `true` |
 | `report_section` | Report section spec (report assembler only) | `knowledge/report_sections/` | `false` |
@@ -44,6 +45,53 @@ The 11 atom types in `gobiq-knowledge`, what they're for, and what their
 
 ## Common pitfalls
 [Things that go wrong when computing this]
+```
+
+### `metric_relationship`
+
+**What it holds:** the causal link between two metrics — direction,
+mechanism, elasticity, confidence, caveats. Authored when the relationship has
+substance worth standalone documentation (used by playbooks, quoted in
+reports). For obvious one-off links, just use a `causes` edge between metric
+atoms instead of authoring a full relationship atom.
+
+Required `_node.yaml` fields:
+- `source_metric` — atom ID of the driving metric
+- `target_metric` — atom ID of the driven metric
+- `direction` — one of `increase_causes_increase`, `decrease_causes_increase`, `decrease_causes_decrease`, `increase_causes_decrease`
+- `mechanism_short` — one-sentence WHY the link exists
+
+Optional fields:
+- `elasticity` — quantitative rule of thumb (formula or descriptive)
+- `formula` — explicit math when applicable
+- `confidence` — `high` / `medium` / `low`
+- `caveats` — list of failure modes
+
+`content.md` template:
+
+```markdown
+# {Source} → {Target} Causal Link
+
+## What this captures
+[Why this relationship matters in a sentence or two]
+
+## Direction
+[Increase causes increase / decrease causes increase / etc.]
+
+## Mechanism
+[The real-world WHY — what causes the link to exist]
+
+## Elasticity (rule of thumb)
+[Worked example showing how to apply the elasticity number]
+
+## Confidence
+[high/medium/low + brief justification]
+
+## Caveats (when the relationship breaks down)
+[Substitution effects, saturation, regime shifts, seasonality]
+
+## How chat / report / playbooks use this
+[The downstream consumption pattern]
 ```
 
 ### `diagnostic`
@@ -111,6 +159,7 @@ Step types:
 - `run_diagnostic` — run a diagnostic rule (returns true/false)
 - `branch` — if/else (with `if_true:` and `if_false:` arms)
 - `call_playbook` — recursive call (ref required)
+- `traverse_causes` — walk the causal graph from `from:` metric to `to:` metric, rendering each `metric_relationship` along the path
 - `terminate` — end the traversal (with verdict template)
 
 `content.md` template:

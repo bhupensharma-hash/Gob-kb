@@ -178,6 +178,8 @@ def _execute_step(
       - branch: if/else based on a condition
       - render: Render a metric / diagnostic / benchmark into output
       - call_playbook: Recursively call another playbook
+      - traverse_causes: Walk the causal graph from `from:` metric to `to:` metric,
+                         rendering each metric_relationship link along the path
       - terminate: End the traversal
     """
     step_type = step.get("step")
@@ -223,10 +225,131 @@ def _execute_step(
         # In production, the fetcher should evaluate the condition and the assembler picks the matching arm.
         return ""
 
+    if step_type == "traverse_causes":
+        return _render_causal_path(graph, step)
+
     if step_type == "terminate":
         return ""
 
     return ""
+
+
+def _render_causal_path(graph: KnowledgeGraph, step: Dict[str, Any]) -> str:
+    """
+    Walk the causal graph from `from:` metric to `to:` metric, rendering each
+    metric_relationship link along the path.
+
+    Strategy:
+      1. BFS from `from_id`, following `causes` edges on metric atoms.
+      2. For each (source, target) edge along the path, look up a
+         `metric_relationship` atom whose source_metric/target_metric match.
+      3. Render each found relationship atom as an HTML block.
+    """
+    from_id = step.get("from")
+    to_id = step.get("to")
+    render_each = step.get("render_each_link", True)
+    max_depth = step.get("max_depth", 5)
+
+    if not from_id:
+        return ""
+
+    # Build adjacency by 'causes' edges out of metric atoms.
+    causes_adj: Dict[str, List[str]] = {}
+    for node in graph.all_nodes():
+        if node.type != "metric":
+            continue
+        for rel in node.related:
+            if rel.get("relation") == "causes":
+                target = rel.get("id")
+                if target:
+                    causes_adj.setdefault(node.id, []).append(target)
+
+    # Also include implicit chain via metric_relationship atoms:
+    # metric_relationship's source_metric → target_metric is a 'causes' edge.
+    for mr in graph.list_nodes(type_filter="metric_relationship"):
+        s = mr.source_metric
+        t = mr.target_metric
+        if s and t:
+            adj = causes_adj.setdefault(s, [])
+            if t not in adj:
+                adj.append(t)
+
+    # BFS to find a path
+    if to_id is None:
+        # Walk all reachable nodes up to max_depth, emit edges in BFS order
+        path_edges: List[tuple] = []
+        visited = {from_id}
+        frontier = [from_id]
+        depth = 0
+        while frontier and depth < max_depth:
+            next_frontier = []
+            for n in frontier:
+                for child in causes_adj.get(n, []):
+                    if child not in visited:
+                        path_edges.append((n, child))
+                        visited.add(child)
+                        next_frontier.append(child)
+            frontier = next_frontier
+            depth += 1
+    else:
+        # BFS to a specific target
+        parents: Dict[str, str] = {from_id: ""}
+        frontier = [from_id]
+        depth = 0
+        while frontier and depth < max_depth and to_id not in parents:
+            next_frontier = []
+            for n in frontier:
+                for child in causes_adj.get(n, []):
+                    if child not in parents:
+                        parents[child] = n
+                        next_frontier.append(child)
+            frontier = next_frontier
+            depth += 1
+        # Reconstruct path
+        path_edges = []
+        if to_id in parents:
+            cur = to_id
+            while parents.get(cur):
+                path_edges.append((parents[cur], cur))
+                cur = parents[cur]
+            path_edges.reverse()
+
+    if not path_edges:
+        return f"<div class='causal-path empty'>No causal path from {_escape(from_id)} to {_escape(to_id or '?')}.</div>"
+
+    # Render each edge by finding the matching metric_relationship atom (if any)
+    blocks: List[str] = []
+    for source, target in path_edges:
+        relationship = _find_relationship_atom(graph, source, target)
+        if relationship and render_each:
+            content = graph.get_content(relationship.id)
+            blocks.append(
+                f"<div class='atom-metric_relationship'>"
+                f"<h3>{_escape(relationship.name)}</h3>"
+                f"<p><strong>{_escape(relationship.mechanism_short or '')}</strong></p>"
+                f"<p>Elasticity: {_escape(relationship.elasticity or 'n/a')}</p>"
+                f"{_md_to_html(content)}"
+                f"</div>"
+            )
+        else:
+            # No formal relationship atom — render a stub edge
+            src = graph.get_node(source)
+            tgt = graph.get_node(target)
+            blocks.append(
+                f"<div class='causal-edge stub'>"
+                f"{_escape(src.name if src else source)} → "
+                f"{_escape(tgt.name if tgt else target)}"
+                f"</div>"
+            )
+    return "\n".join(blocks)
+
+
+def _find_relationship_atom(graph: KnowledgeGraph, source_id: str, target_id: str) -> Optional[KnowledgeNode]:
+    """Find a metric_relationship atom whose source_metric/target_metric match."""
+    for mr in graph.list_nodes(type_filter="metric_relationship"):
+        if mr.source_metric == source_id and mr.target_metric == target_id:
+            return mr
+    return None
 
 
 def _render_section_html(section: RenderedSection) -> str:

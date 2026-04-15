@@ -5,8 +5,11 @@ type: metric
 parent: null
 related:
   - id: "metrics.psl"
-    relation: feeds_into
-    label: "OSA gaps drive PSL"
+    relation: causes
+    label: "OSA decline causes PSL increase"
+  - id: "metric_relationships.osa_drives_psl"
+    relation: composes
+    label: "Mechanism, elasticity, and caveats for the OSA→PSL link"
   - id: "benchmarks.osa_health"
     relation: uses_benchmark
     label: "Apply this benchmark to classify OSA values"

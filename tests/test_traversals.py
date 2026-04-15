@@ -31,6 +31,18 @@ def _walk_steps(steps, graph, visited_playbooks, errors, prefix=""):
             errors.append(f"{path}: invalid step type '{step_type}'")
             continue
 
+        if step_type == "traverse_causes":
+            from_id = step.get("from")
+            to_id = step.get("to")
+            if not from_id:
+                errors.append(f"{path}: traverse_causes missing 'from'")
+                continue
+            if not graph.get_node(from_id):
+                errors.append(f"{path}: traverse_causes 'from' ref '{from_id}' does not resolve")
+            if to_id and not graph.get_node(to_id):
+                errors.append(f"{path}: traverse_causes 'to' ref '{to_id}' does not resolve")
+            continue
+
         if step_type in {"render", "run_diagnostic", "call_playbook"}:
             ref = step.get("ref")
             if not ref:

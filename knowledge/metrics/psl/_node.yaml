@@ -6,10 +6,25 @@ parent: null
 related:
   - id: "metrics.osa"
     relation: triggered_by
-    label: "PSL increases when OSA drops"
+    label: "PSL is triggered when OSA drops"
+  - id: "metric_relationships.osa_drives_psl"
+    relation: composes
+    label: "Mechanism, elasticity, and caveats for the OSA→PSL link"
   - id: "benchmarks.psl_priority"
     relation: uses_benchmark
     label: "Apply this benchmark to classify PSL severity"
+
+# PSL is partly mathematically derived from forecast_demand, inventory, price.
+# The metric atoms for those inputs aren't authored yet — populate this list
+# during Phase 0 migration when those metric atoms are created.
+formula: "psl = MAX(0, forecast_demand - inventory) × price"
+# derives_from:
+#   - metric: metrics.forecast_demand
+#     role: numerator_component
+#   - metric: metrics.inventory
+#     role: numerator_component_subtracted
+#   - metric: metrics.price
+#     role: monetization_factor
 primitives: [availability]
 common_questions:
   - "What is PSL?"

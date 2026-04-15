@@ -7,6 +7,7 @@ This repo is the single source of truth for GoBIQ's analytical knowledge. Both t
 | Want to add... | Do this |
 |---|---|
 | A new metric definition | Create `knowledge/metrics/{metric_id}/` with `_node.yaml` (type: `metric`) + `content.md` |
+| A new causal link between two metrics | Create `knowledge/metric_relationships/{name}/` (type: `metric_relationship`) — source/target/direction/mechanism/elasticity |
 | A new diagnostic rule | Create `knowledge/diagnostics/{rule_id}/` (type: `diagnostic`) — SQL fragment + threshold |
 | A new benchmark / threshold band | Create `knowledge/benchmarks/{name}/` (type: `benchmark`) |
 | A new domain topic | Create `knowledge/domains/{domain}/{topic}/` (type: `topic`) |

@@ -1,0 +1,35 @@
+id: "metric_relationships.osa_drives_psl"
+name: "OSA → PSL Causal Link"
+description: "How OSA drops translate into Potential Sales Loss — mechanism, elasticity, confidence."
+type: metric_relationship
+parent: null
+related:
+  - id: "metrics.osa"
+    relation: causes
+    label: "Source: OSA decline drives PSL increase"
+  - id: "metrics.psl"
+    relation: triggered_by
+    label: "Target: PSL is triggered when OSA drops below recoverable threshold"
+primitives: [availability]
+common_questions:
+  - "If I fix my OSA, how much PSL will I recover?"
+  - "How much revenue is at stake if OSA stays at 68%?"
+  - "What is the elasticity between OSA and PSL?"
+planner_hint: >-
+  Use when the user wants to quantify the revenue impact of an OSA gap,
+  estimate recovery from closing an OSA gap, or understand the mechanism
+  by which stockouts translate into lost sales.
+expose_to_planner: true
+
+# metric_relationship-specific fields
+source_metric: "metrics.osa"
+target_metric: "metrics.psl"
+direction: "decrease_causes_increase"
+mechanism_short: "Stockouts prevent purchases that would otherwise occur at expected demand"
+formula: "psl ≈ MAX(0, forecast_demand × (1 - osa/100)) × price"
+elasticity: "Each 1pp OSA drop ≈ ₹{daily_demand × price × 0.01} PSL/day at the affected store-SKU"
+confidence: high
+caveats:
+  - "Elasticity assumes consumers don't substitute to other own-brand SKUs in the same store."
+  - "Holds within OSA range 50-95%; below 50%, demand-suppression effects (customer learns to expect stockout) reduce realized PSL."
+  - "Festival-period elasticity can be 1.5-3x baseline due to demand spike."

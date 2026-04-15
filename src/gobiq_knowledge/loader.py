@@ -30,6 +30,7 @@ VALID_NODE_TYPES = {
     "topic",
     # Option B taxonomy:
     "metric",
+    "metric_relationship",
     "diagnostic",
     "benchmark",
     "playbook",
@@ -58,6 +59,21 @@ class KnowledgeNode:
     sql: Optional[str] = None                              # diagnostic
     thresholds: List[dict] = field(default_factory=list)   # benchmark
     sections: List[dict] = field(default_factory=list)     # report_section
+
+    # metric_relationship-specific:
+    source_metric: Optional[str] = None
+    target_metric: Optional[str] = None
+    direction: Optional[str] = None
+    mechanism_short: Optional[str] = None
+    elasticity: Optional[str] = None
+    confidence: Optional[str] = None
+    caveats: List[str] = field(default_factory=list)
+
+    # metric / metric_relationship — explicit math when applicable:
+    formula: Optional[str] = None
+
+    # metric — list of input metrics this is computed from:
+    derives_from: List[dict] = field(default_factory=list)
 
     content_path: Optional[Path] = None
 
@@ -109,6 +125,15 @@ class KnowledgeGraph:
                     sql=data.get("sql"),
                     thresholds=data.get("thresholds", []),
                     sections=data.get("sections", []),
+                    source_metric=data.get("source_metric"),
+                    target_metric=data.get("target_metric"),
+                    direction=data.get("direction"),
+                    mechanism_short=data.get("mechanism_short"),
+                    elasticity=data.get("elasticity"),
+                    confidence=data.get("confidence"),
+                    caveats=data.get("caveats", []),
+                    formula=data.get("formula"),
+                    derives_from=data.get("derives_from", []),
                     content_path=content_path if content_path.exists() else None,
                 )
                 self._nodes[node.id] = node

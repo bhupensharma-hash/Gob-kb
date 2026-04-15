@@ -36,6 +36,7 @@ This repo is the merged source. Both apps depend on it as a versioned Python pac
 | Type | Purpose |
 |---|---|
 | `metric` | Definition + formula of one metric (e.g. `osa`, `psl`) |
+| `metric_relationship` | Causal link between two metrics — mechanism, elasticity, confidence |
 | `diagnostic` | SQL fragment + threshold that identifies a pattern |
 | `benchmark` | Value bands tagged to a metric (healthy/warning/critical) |
 | `domain` / `topic` | Subject-area knowledge (the existing GoBIQ tree) |
@@ -52,7 +53,7 @@ See [`docs/content_types.md`](docs/content_types.md) for full details.
 In your consuming app:
 
 ```bash
-pip install gobiq-knowledge @ git+ssh://git@github.com/gobblecube/gobiq-knowledge.git@v0.2.0
+pip install gobiq-knowledge @ git+ssh://git@github.com/gobblecube/gobiq-knowledge.git@v0.3.0
 ```
 
 ## Usage

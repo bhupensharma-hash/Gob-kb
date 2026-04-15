@@ -17,7 +17,7 @@ from typing import Optional
 
 from .loader import KnowledgeGraph, KnowledgeNode
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 _DEFAULT_KNOWLEDGE_ROOT = Path(__file__).resolve().parent.parent.parent / "knowledge"
 

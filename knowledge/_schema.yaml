@@ -24,6 +24,19 @@ optional_fields:
   - thresholds         # OPTIONAL for benchmark nodes — value bands
   - sections           # OPTIONAL for report_section nodes — ordered list of section specs
 
+  # metric_relationship-specific fields:
+  - source_metric      # REQUIRED for metric_relationship — atom ID of the driving metric
+  - target_metric      # REQUIRED for metric_relationship — atom ID of the driven metric
+  - direction          # REQUIRED for metric_relationship — direction of effect
+  - mechanism_short    # REQUIRED for metric_relationship — one-line WHY the link exists
+  - elasticity         # OPTIONAL for metric_relationship — quantitative rule of thumb
+  - formula            # OPTIONAL for metric_relationship and metric — explicit math when applicable
+  - confidence         # OPTIONAL for metric_relationship — high / medium / low
+  - caveats            # OPTIONAL for metric_relationship — list of failure modes
+
+  # metric-specific (NEW for derivation chains):
+  - derives_from       # OPTIONAL for metric — list of input metrics this is computed from
+
 node_types:
   # Existing GoBIQ types (kept):
   - global          # Always auto-loaded (narration rules, eval rubric)
@@ -33,12 +46,13 @@ node_types:
   - topic           # Specific analysis topic within a domain
 
   # New types added for the merged repo (Option B taxonomy):
-  - metric          # Atomic definition of one metric (e.g. osa, psl)
-  - diagnostic      # SQL fragment + threshold that identifies a pattern (e.g. transfer_issue)
-  - benchmark       # Value bands for a metric (healthy/warning/critical)
-  - playbook        # Typed traversal — a decision tree of references to other atoms
-  - report_section  # Report section spec consumed by the report assembler
-  - recipe          # RAG-indexed Q→Action pair (lives inside recipes/*.md, not as a folder)
+  - metric                # Atomic definition of one metric (e.g. osa, psl)
+  - metric_relationship   # Causal link between two metrics — direction, mechanism, elasticity
+  - diagnostic            # SQL fragment + threshold that identifies a pattern (e.g. transfer_issue)
+  - benchmark             # Value bands for a metric (healthy/warning/critical)
+  - playbook              # Typed traversal — a decision tree of references to other atoms
+  - report_section        # Report section spec consumed by the report assembler
+  - recipe                # RAG-indexed Q→Action pair (lives inside recipes/*.md, not as a folder)
 
 relation_types:
   - next_action     # After diagnosing X, do Y
@@ -46,10 +60,16 @@ relation_types:
   - cross_check     # Validate X against Y
   - uses_template   # X follows template Y
   - uses_benchmark  # X classifies values via benchmark Y
-  - feeds_into      # Data from X flows into Y
+  - feeds_into      # Data from X flows into Y (generic data flow, not metric causation)
   - triggered_by    # X is triggered when Y fires
   - composes        # Procedure X composes atoms A, B, C into a workflow
   - rendered_by     # Atom X is rendered into reports by report_section Y
+
+  # NEW metric-dependency relations (more precise than feeds_into):
+  - derives_from    # Metric X is mathematically computed from metric Y
+  - causes          # Metric X's change drives metric Y's change (causal mechanism)
+  - correlates_with # Metrics X and Y move together statistically (no causal claim)
+  - inverse_of      # When X goes up, Y goes down (and vice versa)
 
 # Playbook traversal step types:
 traversal_step_types:
@@ -58,6 +78,7 @@ traversal_step_types:
   - branch             # if/else based on a condition
   - render             # Render a metric / diagnostic / benchmark into output
   - call_playbook      # Recursively call another playbook
+  - traverse_causes    # Walk the causal graph (chain of metric_relationship atoms) from `from:` to `to:`
   - terminate          # End the traversal (with verdict)
 
 # Primitive tags (for filtering / planner):

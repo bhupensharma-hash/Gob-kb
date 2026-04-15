@@ -93,6 +93,33 @@ def validate_node_dict(node_id: str, data: Dict[str, Any]) -> List[str]:
                     f"{node_id}: traversal[{i}] has invalid step type '{step_type}'"
                 )
 
+    # metric_relationship validation
+    if node_type == "metric_relationship":
+        for required in ("source_metric", "target_metric", "direction", "mechanism_short"):
+            if not data.get(required):
+                errors.append(
+                    f"{node_id}: metric_relationship must declare '{required}'"
+                )
+        valid_directions = {
+            "increase_causes_increase",
+            "decrease_causes_increase",
+            "decrease_causes_decrease",
+            "increase_causes_decrease",
+        }
+        direction = data.get("direction")
+        if direction and direction not in valid_directions:
+            errors.append(
+                f"{node_id}: invalid direction '{direction}' "
+                f"(must be one of: {sorted(valid_directions)})"
+            )
+        valid_confidences = {"high", "medium", "low"}
+        confidence = data.get("confidence")
+        if confidence and confidence not in valid_confidences:
+            errors.append(
+                f"{node_id}: invalid confidence '{confidence}' "
+                f"(must be one of: {sorted(valid_confidences)})"
+            )
+
     return errors
 
 
